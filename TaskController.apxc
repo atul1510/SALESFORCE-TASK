@@ -1,0 +1,68 @@
+public with sharing class TaskController {
+    // Method to get tasks assigned to the current user
+    @AuraEnabled(cacheable=true)
+    public static List<Task__c> getUserTasks(String priorityFilter, String statusFilter) {
+        List<Task__c> tasks = [SELECT Id, Name, Description__c, Due_Date__c, Priority__c, Status__c
+                               FROM Task__c
+                               WHERE Assigned_To__c = :UserInfo.getUserId()];
+
+        // Apply priority filter if provided
+        if (priorityFilter != null && priorityFilter != '') {
+            tasks = [SELECT Id, Name, Description__c, Due_Date__c, Priority__c, Status__c
+                     FROM Task__c
+                     WHERE Assigned_To__c = :UserInfo.getUserId() 
+                     AND Priority__c = :priorityFilter];
+        }
+        
+        // Apply status filter if provided
+        if (statusFilter != null && statusFilter != '') {
+            tasks = [SELECT Id, Name, Description__c, Due_Date__c, Priority__c, Status__c
+                     FROM Task__c
+                     WHERE Assigned_To__c = :UserInfo.getUserId() 
+                     AND Status__c = :statusFilter];
+        }
+
+        // Apply both filters if both are provided
+        if (priorityFilter != null && priorityFilter != '' && statusFilter != null && statusFilter != '') {
+            tasks = [SELECT Id, Name, Description__c, Due_Date__c, Priority__c, Status__c
+                     FROM Task__c
+                     WHERE Assigned_To__c = :UserInfo.getUserId() 
+                     AND Priority__c = :priorityFilter
+                     AND Status__c = :statusFilter];
+        }
+
+        return tasks;
+    }
+
+    // Method to create a new task
+    @AuraEnabled
+    public static void createTask(Task__c newTask) {
+         try {
+        // Ensure Assigned_To__c is set to the current user
+        newTask.Assigned_To__c = UserInfo.getUserId();
+        
+        // Insert the new task
+        insert newTask;
+    } catch (Exception e) {
+        // Log the error for debugging and throw a user-friendly error message
+        System.debug('Error creating task: ' + e.getMessage());
+        throw new AuraHandledException('An error occurred while creating the task: ' + e.getMessage());
+    }
+    }
+
+    // Method to update the status of a task
+    @AuraEnabled(cacheable=true)
+    public static void updateTaskStatus(Id taskId, String status) {
+        Task__c task = [SELECT Id, Status__c FROM Task__c WHERE Id = :taskId LIMIT 1];
+        task.Status__c = status;
+        update task;
+    }
+
+    // Method to delete a task
+    @AuraEnabled(cacheable=true)
+    public static void deleteTask(Id taskId) {
+        delete [SELECT Id FROM Task__c WHERE Id = :taskId LIMIT 1];
+    }
+   
+    
+}
