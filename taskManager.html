@@ -1,0 +1,28 @@
+<template>
+    <!-- Task Creation Form -->
+    <lightning-card title="Task Manager" class="slds-m-bottom_medium slds-card">
+        <div class="slds-p-around_medium">
+            <lightning-input label="Task Name" value={taskName} onchange={handleInputChange} data-id="taskName" class="slds-form-element"></lightning-input>
+            <lightning-textarea label="Description" value={description} onchange={handleInputChange} data-id="description" class="slds-form-element"></lightning-textarea>
+            <lightning-input label="Due Date" type="date" value={dueDate} onchange={handleInputChange} data-id="dueDate" class="slds-form-element"></lightning-input>
+            <lightning-combobox label="Priority" value={priority} options={priorityOptions} onchange={handleInputChange} data-id="priority" class="slds-form-element"></lightning-combobox>
+            <lightning-button variant="brand" label="Create Task" onclick={createTask} class="slds-m-top_medium"></lightning-button>
+        </div>
+    </lightning-card>
+
+    <!-- Task Data Table -->
+    <lightning-card title="My Tasks" class="slds-m-bottom_medium slds-card">
+        <div class="slds-p-around_medium">
+        <lightning-combobox label="Filter by Priority" value={priorityFilter} options={priorityOptions} onchange={handleFilterChange} data-id="priorityFilter"></lightning-combobox>
+<lightning-combobox label="Filter by Status" value={statusFilter} options={statusOptions} onchange={handleFilterChange} data-id="statusFilter"></lightning-combobox>
+        <lightning-datatable
+            key-field="Id"
+            data={tasks}
+            columns={columns}
+            onsave={handleSave}
+            draft-values={draftValues}
+            class="slds-m-top_medium slds-table_striped">
+        </lightning-datatable>
+        </div>
+    </lightning-card>
+</template>
